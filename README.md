@@ -19,20 +19,37 @@ The `01_Data_preprocessing.r` script performs the following steps:
 2. **Quality Control Filtering**
    - Removes cells with UMI counts in the lower 1% for each donor
    - Retains only cells with <5% mitochondrial content
+![QC plot](Readme_figures/1-2/2025-04-05_MS4A_KO_mice_before_QC_merged.png)
+![Example of filtering 1% UMI](Readme_figures/1-2/UMI_histogram_5XFAD4A-75.png)
+![QC Remove](Readme_figures/1-2/2025-04-05_UMAP_MS4A_KO_mice_QC_filtering.png)
 
 3. **Doublet Removal**
    - Implements both `scDblFinder` and `DoubletFinder` algorithms
    - Removes cells identified as doublets by either method
+
+<p align="center">
+  <img src="Readme_figures/1-3/MS4A_KO_mice_umap_DoubletFinder.png" alt="DoubletFinder UMAP" width="45%" />
+  <img src="Readme_figures/1-3/MS4A_KO_mice_umap_scDblFinder.png" alt="scDblFinder UMAP" width="45%" />
+</p>
 
 4. **Ambient RNA Removal**
    - Uses DecontX to identify and correct for ambient RNA contamination
    - Removes cells with >20% contamination
    - Sets corrected counts as the default for downstream analysis
 
+<p align="center">
+  <img src="Readme_figures/1-4/MS4A_KO_mice_umap_decontx_remove_0.2.png" alt="DecontX removal" width="45%" />
+</p>
+
 5. **Cell Type Segregation**
    - Splits the dataset into major cell types based on Azimuth annotation and Seurat clustering
    - Major cell types include: Oligodendrocytes, Astrocytes, Microglia, Excitatory neurons, Inhibitory neurons, OPCs, and Others
    - Performs Harmony integration on each cell type separately
+
+<p align="center">
+  <img src="Readme_figures/1-5/MS4A_KO_mice_umap_split_by_celltype.png" alt="UMAP by Cell Type" width="45%" />
+  <img src="Readme_figures/1-5/MS4A_KO_mice_umap_split_by_treatment.png" alt="UMAP by Treatment" width="45%" />
+</p>
 
 The `02_Major_celltype_analysis.r` script performs the following steps:
 
