@@ -21,25 +21,26 @@ The `01_Data_preprocessing.r` script performs the following steps:
    - Retains only cells with <5% mitochondrial content
 ![QC plot](Readme_figures/1-2/2025-04-05_MS4A_KO_mice_before_QC_merged.png)
 <p align="center">
-   <img src="Readme_figures/1-2/UMI_histogram_5XFAD4A-35.png" width = "15%"/>
-   <img src="Readme_figures/1-2/UMI_histogram_5XFAD4A-42.png" width = "15%"/>
-   <img src="Readme_figures/1-2/UMI_histogram_5XFAD4A-47.png" width = "15%"/>
-   <img src="Readme_figures/1-2/UMI_histogram_5XFAD4A-53.png" width = "15%"/>
-   <img src="Readme_figures/1-2/UMI_histogram_5XFAD4A-54.png" width = "15%"/>
-   <img src="Readme_figures/1-2/UMI_histogram_5XFAD4A-57.png" width = "15%"/>
-   <img src="Readme_figures/1-2/UMI_histogram_5XFAD4A-59.png" width = "15%"/>
-   <img src="Readme_figures/1-2/UMI_histogram_5XFAD4A-60.png" width = "15%"/>
-</p>
-   <img src="Readme_figures/1-2/UMI_histogram_5XFAD4A-66.png" width = "15%"/>
-   <img src="Readme_figures/1-2/UMI_histogram_5XFAD4A-70.png" width = "15%"/>
-   <img src="Readme_figures/1-2/UMI_histogram_5XFAD4A-73.png" width = "15%"/>
-   <img src="Readme_figures/1-2/UMI_histogram_5XFAD4A-75.png" width = "15%"/>
-   <img src="Readme_figures/1-2/UMI_histogram_Exp12_KO1_Hipp.png" width = "15%"/>
-   <img src="Readme_figures/1-2/UMI_histogram_Exp12_KO2_Hipp.png" width = "15%"/>
-   <img src="Readme_figures/1-2/UMI_histogram_Exp12_WT1_Hipp.png" width = "15%"/>
-   <img src="Readme_figures/1-2/UMI_histogram_Exp12_WT2_Hipp.png" width = "15%"/>
+   <img src="Readme_figures/1-2/UMI_histogram_5XFAD4A-35.png" width="12%"/>
+   <img src="Readme_figures/1-2/UMI_histogram_5XFAD4A-42.png" width="12%"/>
+   <img src="Readme_figures/1-2/UMI_histogram_5XFAD4A-47.png" width="12%"/>
+   <img src="Readme_figures/1-2/UMI_histogram_5XFAD4A-53.png" width="12%"/>
+   <img src="Readme_figures/1-2/UMI_histogram_5XFAD4A-54.png" width="12%"/>
+   <img src="Readme_figures/1-2/UMI_histogram_5XFAD4A-57.png" width="12%"/>
+   <img src="Readme_figures/1-2/UMI_histogram_5XFAD4A-59.png" width="12%"/>
+   <img src="Readme_figures/1-2/UMI_histogram_5XFAD4A-60.png" width="12%"/>
 </p>
 
+<p align="center">
+   <img src="Readme_figures/1-2/UMI_histogram_5XFAD4A-66.png" width="12%"/>
+   <img src="Readme_figures/1-2/UMI_histogram_5XFAD4A-70.png" width="12%"/>
+   <img src="Readme_figures/1-2/UMI_histogram_5XFAD4A-73.png" width="12%"/>
+   <img src="Readme_figures/1-2/UMI_histogram_5XFAD4A-75.png" width="12%"/>
+   <img src="Readme_figures/1-2/UMI_histogram_Exp12_KO1_Hipp.png" width="12%"/>
+   <img src="Readme_figures/1-2/UMI_histogram_Exp12_KO2_Hipp.png" width="12%"/>
+   <img src="Readme_figures/1-2/UMI_histogram_Exp12_WT1_Hipp.png" width="12%"/>
+   <img src="Readme_figures/1-2/UMI_histogram_Exp12_WT2_Hipp.png" width="12%"/>
+</p>
 ![QC Remove](Readme_figures/1-2/2025-04-05_UMAP_MS4A_KO_mice_QC_filtering.png)
 
 3. **Doublet Removal**
