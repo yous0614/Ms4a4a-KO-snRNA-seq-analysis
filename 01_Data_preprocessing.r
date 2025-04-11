@@ -365,15 +365,22 @@ Micro = merged_obj %>% subset(seurat_clusters == 3)
 Astro = merged_obj %>% subset(seurat_clusters == 5)
 OPC = merged_obj %>% subset(seurat_clusters == 10)
 Excit = merged_obj %>% subset(seurat_clusters %in% c(1, 16, 4, 9, 7, 11, 6, 2, 15, 21, 19, 13, 17, 12)) %>% subset(predicted.class == "Glutamatergic") 
+Excit@meta.data$predicted.class %>% table
+Excit@meta.data$seurat_clusters %>% table
+Excit@meta.data$predicted.subclass %>% table
 Inhib = merged_obj %>% subset(seurat_clusters %in% c(8, 22, 13, 12, 20)) %>% subset(predicted.class == "GABAergic")
+Inhib@meta.data$predicted.class %>% table
+Inhib@meta.data$seurat_clusters %>% table
+Inhib@meta.data$predicted.subclass %>% table
 Other = merged_obj %>% subset(seurat_clusters == 14)
+
 
 # Harmony Integration for each of the cell types
 library(harmony)
 
-Micro$batch = ifelse(str_detect(Micro$orig.ident, "Exp"), "batch2", "batch1")
+#Micro$batch = ifelse(str_detect(Micro$orig.ident, "Exp"), "batch2", "batch1")
 
-Celltype_HarmonyIntegration <- function(obj, n){
+Celltype_HarmonyIntegration <- function(obj){
   obj[["decontX"]] <- split(obj[["decontX"]], f = obj$orig.ident)
   obj = obj %>% NormalizeData() %>% FindVariableFeatures()
 
@@ -399,7 +406,7 @@ Celltype_HarmonyIntegration <- function(obj, n){
   return(obj)
 }
 
-Celltype_HarmonyIntegration_for_neuron <- function(obj, n){
+Celltype_HarmonyIntegration_for_neuron <- function(obj){
   obj[["decontX"]] <- split(obj[["decontX"]], f = obj$orig.ident)
   obj = obj %>% NormalizeData() %>% FindVariableFeatures()
 
@@ -409,7 +416,7 @@ Celltype_HarmonyIntegration_for_neuron <- function(obj, n){
   VariableFeatures(obj) <- filtered_genes
   print(table(grepl("^Rpl|^Rps", filtered_genes)))  # Should return all FALSE
 
-  #obj = obj %>% ScaleData(vars.to.regress = c("nFeature_RNA", "nCount_RNA", "percent.mt", "percent.ribo")) %>% RunPCA()
+  #obj = obj %>% ScaleData(vars.to.regress = c("nFeature_RNA", "nCount_RNA")) %>% RunPCA()
   obj = obj %>% ScaleData() %>% RunPCA()
   #obj = obj %>% FindNeighbors() 
   #obj = obj %>% FindClusters(resolution = 0.2) 
@@ -432,7 +439,7 @@ try_ndims = function(obj, range){
     RunUMAP(dims = 1:ndims, reduction = "harmony", reduction.name = "umap.harmony")
     setwd("/home/yous/Projects/2025-4-5 Ms4a4a KO mice/1-Result/0-Preprocessing/3-Split_by_cell_type")
     png(paste0("MS4A_KO_mice_umap_harmony_", obj$predicted.subclass[1], "_ndims_", ndims,".png"), width = 20, height = 15, units = "in", res = 300)
-    p = DimPlot(obj, reduction = "umap.harmony", group.by = c("orig.ident", "harmony_clusters",  "genotype", "sex"), label = TRUE, pt.size = 1.5) + 
+    p = DimPlot(obj, reduction = "umap.harmony", group.by = c("orig.ident", "harmony_clusters",  "genotype", "predicted.subclass"), label = TRUE, pt.size = 1.5) + 
     labs(title = paste0("Harmony Integration ", ndims))
     print(p)
     dev.off()
@@ -488,21 +495,21 @@ OPC_Integrated = try_ndims(OPC_Integrated, range = 7)
 qsave(OPC_Integrated, "/home/yous/Projects/2025-4-5 Ms4a4a KO mice/0-Data/1-Cell_types/MS4A_KO_mice_OPC_HarmonyIntegrated.qs")
 
 #Excitatory neurons
-Excit_Integrated = Celltype_HarmonyIntegration(Excit) #No regress to either features -> cause error in ScaleData
+Excit_Integrated = Celltype_HarmonyIntegration_for_neuron(Excit) #No regress to either features -> cause error in ScaleData
 try_ndims_for_neuron(Excit_Integrated, range = c(8, 16, 22, 30, 40))
-Excit_Integrated = try_ndims_for_neuron(Excit_Integrated, range = 30)
+Excit_Integrated = try_ndims_for_neuron(Excit_Integrated, range = 8)
 qsave(Excit_Integrated, "/home/yous/Projects/2025-4-5 Ms4a4a KO mice/0-Data/1-Cell_types/MS4A_KO_mice_Excitatory_neurons_HarmonyIntegrated.qs")
 
 # Inhibitory neurons
 Inhib_Integrated = Celltype_HarmonyIntegration_for_neuron(Inhib)
-try_ndims_for_neuron(Inhib_Integrated, range = c())
-Inhib_Integrated = try_ndims_for_neuron(Inhib_Integrated, range = 30)
+try_ndims_for_neuron(Inhib_Integrated, range = c(8, 10, 12, 20, 30, 40))
+Inhib_Integrated = try_ndims_for_neuron(Inhib_Integrated, range = 8)
 qsave(Inhib_Integrated, "/home/yous/Projects/2025-4-5 Ms4a4a KO mice/0-Data/1-Cell_types/MS4A_KO_mice_Inhibitory_neurons_HarmonyIntegrated.qs")
 
 # Other cell types (e.g. VLMC, Pericytes, etc.)
 Other_Integrated = Celltype_HarmonyIntegration(Other)
-try_ndims(Other_Integrated, range = c())
-Other_Integrated = try_ndims(Other_Integrated, range = 30)
+try_ndims(Other_Integrated, range = c(6, 8, 11, 13, 20, 30, 40))
+Other_Integrated = try_ndims(Other_Integrated, range = 13)
 qsave(Other_Integrated, "/home/yous/Projects/2025-4-5 Ms4a4a KO mice/0-Data/1-Cell_types/MS4A_KO_mice_Other_HarmonyIntegrated.qs")
 
 ****************************************
@@ -518,86 +525,86 @@ qsave(Other_Integrated, "/home/yous/Projects/2025-4-5 Ms4a4a KO mice/0-Data/1-Ce
 #########################################################
 
 #remove Exp12
-merged_obj$batch = ifelse(str_detect(merged_obj$orig.ident, "Exp"), "Exp2", "Exp1")
-merged_obj@meta.data[,c("orig.ident", "batch")] %>% unique
-merged_obj = subset(merged_obj, batch == "Exp1") # keep only Exp1 samples
+# merged_obj$batch = ifelse(str_detect(merged_obj$orig.ident, "Exp"), "Exp2", "Exp1")
+# merged_obj@meta.data[,c("orig.ident", "batch")] %>% unique
+# merged_obj = subset(merged_obj, batch == "Exp1") # keep only Exp1 samples
 
-setwd("/home/yous/Projects/2025-4-5 Ms4a4a KO mice/1-Result/0-Preprocessing/4-Split_by_cell_type_remove_Exp12")
-png("MS4A_KO_mice_umap_split_by_celltype.png", width = 20, height = 15, units = "in", res = 300)
-DimPlot(merged_obj, reduction = "umap.unintegrated", group.by = c("orig.ident", "seurat_clusters", "predicted.class","predicted.subclass"), label = TRUE, pt.size = 1, raster = T) + labs(title = "Split by Major Cell Types")
-dev.off()
-png("MS4A_KO_mice_umap_split_by_treatment.png", width = 20, height = 15, units = "in", res = 300)
-DimPlot(merged_obj, reduction = "umap.unintegrated", group.by = c("orig.ident","predicted.subclass", "genotype", "sex"), label = TRUE, pt.size = 1, raster = T) + labs(title = "Split by Major Cell Types")
-dev.off()
+# setwd("/home/yous/Projects/2025-4-5 Ms4a4a KO mice/1-Result/0-Preprocessing/4-Split_by_cell_type_remove_Exp12")
+# png("MS4A_KO_mice_umap_split_by_celltype.png", width = 20, height = 15, units = "in", res = 300)
+# DimPlot(merged_obj, reduction = "umap.unintegrated", group.by = c("orig.ident", "seurat_clusters", "predicted.class","predicted.subclass"), label = TRUE, pt.size = 1, raster = T) + labs(title = "Split by Major Cell Types")
+# dev.off()
+# png("MS4A_KO_mice_umap_split_by_treatment.png", width = 20, height = 15, units = "in", res = 300)
+# DimPlot(merged_obj, reduction = "umap.unintegrated", group.by = c("orig.ident","predicted.subclass", "genotype", "sex"), label = TRUE, pt.size = 1, raster = T) + labs(title = "Split by Major Cell Types")
+# dev.off()
 
-Oligo = merged_obj %>% subset(seurat_clusters == 0)
-Micro = merged_obj %>% subset(seurat_clusters == 3)
-Astro = merged_obj %>% subset(seurat_clusters == 5)
-OPC = merged_obj %>% subset(seurat_clusters == 10)
-Excit = merged_obj %>% subset(predicted.class == "Glutamatergic") %>% subset(seurat_clusters %in% c(1, 16, 4, 9, 7, 11, 6, 2, 15, 21, 19, 13, 17, 12))
-Inhib = merged_obj %>% subset(predicted.class == "GABAergic") %>% subset(seurat_clusters %in% c(8, 22, 13, 12, 20))
-Other = merged_obj %>% subset(seurat_clusters == 14)
+# Oligo = merged_obj %>% subset(seurat_clusters == 0)
+# Micro = merged_obj %>% subset(seurat_clusters == 3)
+# Astro = merged_obj %>% subset(seurat_clusters == 5)
+# OPC = merged_obj %>% subset(seurat_clusters == 10)
+# Excit = merged_obj %>% subset(predicted.class == "Glutamatergic") %>% subset(seurat_clusters %in% c(1, 16, 4, 9, 7, 11, 6, 2, 15, 21, 19, 13, 17, 12))
+# Inhib = merged_obj %>% subset(predicted.class == "GABAergic") %>% subset(seurat_clusters %in% c(8, 22, 13, 12, 20))
+# Other = merged_obj %>% subset(seurat_clusters == 14)
 
-# Harmony Integration for each of the cell types
-library(harmony)
+# # Harmony Integration for each of the cell types
+# library(harmony)
 
-Celltype_HarmonyIntegration <- function(obj, n){
-  obj[["decontX"]] <- split(obj[["decontX"]], f = obj$orig.ident)
-  obj = obj %>% NormalizeData() %>% FindVariableFeatures()
+# Celltype_HarmonyIntegration <- function(obj, n){
+#   obj[["decontX"]] <- split(obj[["decontX"]], f = obj$orig.ident)
+#   obj = obj %>% NormalizeData() %>% FindVariableFeatures()
 
-  # Not use ribosomal gene for variable feature selection
-  variable_genes <- VariableFeatures(obj)
-  filtered_genes <- variable_genes[!grepl("^Rpl|^Rps", variable_genes)]
-  VariableFeatures(obj) <- filtered_genes
-  print(table(grepl("^Rpl|^Rps", filtered_genes)))  # Should return all FALSE
+#   # Not use ribosomal gene for variable feature selection
+#   variable_genes <- VariableFeatures(obj)
+#   filtered_genes <- variable_genes[!grepl("^Rpl|^Rps", variable_genes)]
+#   VariableFeatures(obj) <- filtered_genes
+#   print(table(grepl("^Rpl|^Rps", filtered_genes)))  # Should return all FALSE
 
-  obj = obj %>% ScaleData(vars.to.regress = c("nFeature_RNA", "nCount_RNA", "percent.mt", "percent.ribo")) %>% RunPCA() 
-  #obj = obj %>% FindNeighbors() 
-  #obj = obj %>% FindClusters(resolution = 0.2) 
-  #obj = obj %>% RunUMAP(dims = 1:30)
+#   obj = obj %>% ScaleData(vars.to.regress = c("nFeature_RNA", "nCount_RNA", "percent.mt", "percent.ribo")) %>% RunPCA() 
+#   #obj = obj %>% FindNeighbors() 
+#   #obj = obj %>% FindClusters(resolution = 0.2) 
+#   #obj = obj %>% RunUMAP(dims = 1:30)
   
-  setwd("/home/yous/Projects/2025-4-5 Ms4a4a KO mice/1-Result/0-Preprocessing/4-Split_by_cell_type_remove_Exp12/")
-  png(paste0("MS4A_KO_mice_Elbow_plot_", obj$predicted.subclass[1], ".png"), width = 5, height = 5, units = "in", res = 300)
-  p = ElbowPlot(obj, ndims = 50) + labs(title = paste("Elbow Plot for", obj$predicted.subclass[1]))
-  print(p)
-  dev.off()
-  obj = obj %>% IntegrateLayers(method = HarmonyIntegration, orig.reduction = "pca", new.reduction = "harmony")
-  obj = JoinLayers(obj)
-  return(obj)
-}
+#   setwd("/home/yous/Projects/2025-4-5 Ms4a4a KO mice/1-Result/0-Preprocessing/4-Split_by_cell_type_remove_Exp12/")
+#   png(paste0("MS4A_KO_mice_Elbow_plot_", obj$predicted.subclass[1], ".png"), width = 5, height = 5, units = "in", res = 300)
+#   p = ElbowPlot(obj, ndims = 50) + labs(title = paste("Elbow Plot for", obj$predicted.subclass[1]))
+#   print(p)
+#   dev.off()
+#   obj = obj %>% IntegrateLayers(method = HarmonyIntegration, orig.reduction = "pca", new.reduction = "harmony")
+#   obj = JoinLayers(obj)
+#   return(obj)
+# }
 
-try_ndims = function(obj, range){
-  for(ndims in range) {
-    obj = obj %>% FindNeighbors(dims = 1:ndims, reduction = "harmony") %>% FindClusters(resolution = 0.2, cluster.name = "harmony_clusters") %>% 
-    RunUMAP(dims = 1:ndims, reduction = "harmony", reduction.name = "umap.harmony")
-    setwd("/home/yous/Projects/2025-4-5 Ms4a4a KO mice/1-Result/0-Preprocessing/4-Split_by_cell_type_remove_Exp12/")
-    png(paste0("MS4A_KO_mice_umap_harmony_", obj$predicted.subclass[1], "_ndims_", ndims,".png"), width = 20, height = 15, units = "in", res = 300)
-    p = DimPlot(obj, reduction = "umap.harmony", group.by = c("orig.ident", "harmony_clusters",  "genotype", "sex"), label = TRUE, pt.size = 1.5) 
-    print(p)
-    dev.off()
-  }
-  return(obj)
-}
+# try_ndims = function(obj, range){
+#   for(ndims in range) {
+#     obj = obj %>% FindNeighbors(dims = 1:ndims, reduction = "harmony") %>% FindClusters(resolution = 0.2, cluster.name = "harmony_clusters") %>% 
+#     RunUMAP(dims = 1:ndims, reduction = "harmony", reduction.name = "umap.harmony")
+#     setwd("/home/yous/Projects/2025-4-5 Ms4a4a KO mice/1-Result/0-Preprocessing/4-Split_by_cell_type_remove_Exp12/")
+#     png(paste0("MS4A_KO_mice_umap_harmony_", obj$predicted.subclass[1], "_ndims_", ndims,".png"), width = 20, height = 15, units = "in", res = 300)
+#     p = DimPlot(obj, reduction = "umap.harmony", group.by = c("orig.ident", "harmony_clusters",  "genotype", "sex"), label = TRUE, pt.size = 1.5) 
+#     print(p)
+#     dev.off()
+#   }
+#   return(obj)
+# }
 
-Oligo_Integrated = Celltype_HarmonyIntegration(Oligo)
-Micro_Integrated = Celltype_HarmonyIntegration(Micro)
-Astro_Integrated = Celltype_HarmonyIntegration(Astro)
-OPC_Integrated = Celltype_HarmonyIntegration(OPC)
-Excit_Integrated = Celltype_HarmonyIntegration(Excit)
-Inhib_Integrated = Celltype_HarmonyIntegration(Inhib)
-Other_Integrated = Celltype_HarmonyIntegration(Other)
+# Oligo_Integrated = Celltype_HarmonyIntegration(Oligo)
+# Micro_Integrated = Celltype_HarmonyIntegration(Micro)
+# Astro_Integrated = Celltype_HarmonyIntegration(Astro)
+# OPC_Integrated = Celltype_HarmonyIntegration(OPC)
+# Excit_Integrated = Celltype_HarmonyIntegration(Excit)
+# Inhib_Integrated = Celltype_HarmonyIntegration(Inhib)
+# Other_Integrated = Celltype_HarmonyIntegration(Other)
 
-try_ndims(Oligo_Integrated, range = c(7, 12, 20, 30, 40))
-try_ndims(Micro_Integrated, range = c(7, 12, 20, 30, 40))
+# try_ndims(Oligo_Integrated, range = c(7, 12, 20, 30, 40))
+# try_ndims(Micro_Integrated, range = c(7, 12, 20, 30, 40))
 
-try_ndims(Astro_Integrated, range = c(6, 9, 10, 13, 20, 30))
-try_ndims(OPC_Integrated, range = c(6, 9, 10, 13, 20, 30))
-try_ndims(Excit_Integrated, range = c(6, 9, 10, 13, 20, 30))
-try_ndims(Inhib_Integrated, range = c(6, 9, 10, 13, 20, 30))
-try_ndims(Other_Integrated, range = c(6, 9, 10, 13, 20, 30)) 
+# try_ndims(Astro_Integrated, range = c(6, 9, 10, 13, 20, 30))
+# try_ndims(OPC_Integrated, range = c(6, 9, 10, 13, 20, 30))
+# try_ndims(Excit_Integrated, range = c(6, 9, 10, 13, 20, 30))
+# try_ndims(Inhib_Integrated, range = c(6, 9, 10, 13, 20, 30))
+# try_ndims(Other_Integrated, range = c(6, 9, 10, 13, 20, 30)) 
 
-****************************************
-Later found Exp12 after remove batch effect, they are acting like more homeostatic microglia, so retain these cells for analysis.
-****************************************
+# ****************************************
+# Later found Exp12 after remove batch effect, they are acting like more homeostatic microglia, so retain these cells for analysis.
+# ****************************************
 
 
