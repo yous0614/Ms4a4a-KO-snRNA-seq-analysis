@@ -41,6 +41,7 @@ The `01_Data_preprocessing.r` script performs the following steps:
    <img src="Readme_figures/1-2/UMI_histogram_Exp12_WT1_Hipp.png" width="12%"/>
    <img src="Readme_figures/1-2/UMI_histogram_Exp12_WT2_Hipp.png" width="12%"/>
 </p>
+
 ![QC Remove](Readme_figures/1-2/2025-04-05_UMAP_MS4A_KO_mice_QC_filtering.png)
 
 3. **Doublet Removal**
